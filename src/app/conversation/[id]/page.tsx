@@ -14,12 +14,21 @@ export default function ConversationPage({ params }: Params) {
   const [penalties, setPenalties] = useState<{ blaming: boolean; sensitive: boolean }>({ blaming: true, sensitive: false });
   const [overrides, setOverrides] = useState<string[]>(["EVIDENCE_MISSING"]);
   const [audit, setAudit] = useState<string[]>([]);
+  const [currentTime, setCurrentTime] = useState<string>("");
+
+  useEffect(() => {
+    setCurrentTime(new Date().toLocaleTimeString());
+    const interval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
   const [config, setConfig] = useState<{ ok: number; reviewMin: number; penaltyBlaming: number; penaltySensitive: number; version: string } | null>(null);
   const { addToast } = useToast();
 
   useEffect(() => {
     // Load config from localStorage if set by Admin, else defaults
-    const raw = typeof window !== "undefined" ? window.localStorage.getItem("qc-config") : null;
+    const raw = window.localStorage.getItem("qc-config");
     if (raw) setConfig(JSON.parse(raw));
     else setConfig(DEFAULT_CONFIG);
   }, []);
@@ -44,7 +53,7 @@ export default function ConversationPage({ params }: Params) {
   function updateParamResult(key: string, result: Param["result"]) {
     setParamsState((prev) => prev.map((p) => (p.key === key ? { ...p, result } : p)));
     setAudit((a) => [
-      `Param ${key} set to ${result} @ ${new Date().toLocaleTimeString()}`,
+      `Param ${key} set to ${result} @ ${currentTime}`,
       ...a,
     ]);
   }
@@ -52,7 +61,7 @@ export default function ConversationPage({ params }: Params) {
   function togglePenalty(kind: "blaming" | "sensitive") {
     setPenalties((p) => ({ ...p, [kind]: !p[kind] }));
     setAudit((a) => [
-      `Penalty ${kind} toggled @ ${new Date().toLocaleTimeString()}`,
+      `Penalty ${kind} toggled @ ${currentTime}`,
       ...a,
     ]);
   }
@@ -60,7 +69,7 @@ export default function ConversationPage({ params }: Params) {
   function toggleOverride(tag: string) {
     setOverrides((o) => (o.includes(tag) ? o.filter((t) => t !== tag) : [...o, tag]));
     setAudit((a) => [
-      `Override ${tag} toggled @ ${new Date().toLocaleTimeString()}`,
+      `Override ${tag} toggled @ ${currentTime}`,
       ...a,
     ]);
   }
@@ -191,9 +200,9 @@ const TRANSCRIPT = [
   { turn: 3, speaker: "User", text: "It was 14 days ago." },
 ];
 
-const PARAMS = [
-  { key: "pp_accuracy", name: "Accuracy of P&P", weight: 10, result: "Fail", notes: "Promised refund policy not in KB." },
-  { key: "compliance", name: "Compliance", weight: 8, result: "Pass", notes: "" },
+const PARAMS: Param[] = [
+  { key: "pp_accuracy", name: "Accuracy of P&P", weight: 10, result: "Fail" as const, notes: "Promised refund policy not in KB." },
+  { key: "compliance", name: "Compliance", weight: 8, result: "Pass" as const, notes: "" },
 ];
 
 const EVIDENCE = [

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ import {
   Share,
   ArrowLeft
 } from "lucide-react";
-import { QCEvaluation, ConversationTurn, Evidence, Priority } from "@/types";
+import { QCEvaluation, Turn, Evidence, Priority } from "@/types";
 
 interface ConversationDetailProps {
   evaluation: QCEvaluation;
@@ -35,6 +35,13 @@ interface ConversationDetailProps {
 
 export default function ConversationDetail({ evaluation, onBack }: ConversationDetailProps) {
   const [activeTab, setActiveTab] = useState("conversation");
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    setCurrentTime(new Date());
+    const interval = setInterval(() => setCurrentTime(new Date()), 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -84,7 +91,7 @@ export default function ConversationDetail({ evaluation, onBack }: ConversationD
       return `${hours}h`;
     }
     if (evaluation.status === "processing") {
-      const diff = Date.now() - evaluation.created_at.getTime();
+      const diff = currentTime.getTime() - evaluation.created_at.getTime();
       const hours = Math.round(diff / (1000 * 60 * 60) * 10) / 10;
       return `${hours}h (ongoing)`;
     }
@@ -211,34 +218,34 @@ export default function ConversationDetail({ evaluation, onBack }: ConversationD
 
 function ConversationView({ evaluation }: { evaluation: QCEvaluation }) {
   // Mock conversation data based on evaluation
-  const mockTurns: ConversationTurn[] = [
+  const mockTurns: Turn[] = [
     {
       id: "turn_1",
-      speaker: "customer",
-      message: "Hi, I need help with my billing issue. I was charged twice for the same service.",
-      timestamp: new Date(evaluation.created_at.getTime() - 300000),
-      metadata: { channel: "chat", session_id: evaluation.conversation_id }
+      conversation_id: evaluation.conversation_id,
+      speaker: "user",
+      content: "Hi, I need help with my billing issue. I was charged twice for the same service.",
+      timestamp: new Date(evaluation.created_at.getTime() - 300000)
     },
     {
       id: "turn_2", 
-      speaker: "agent",
-      message: "I understand your concern about the duplicate charge. Let me look into your account to investigate this billing issue.",
-      timestamp: new Date(evaluation.created_at.getTime() - 240000),
-      metadata: { agent_id: "agent_123", response_time_ms: 45000 }
+      conversation_id: evaluation.conversation_id,
+      speaker: "bot",
+      content: "I understand your concern about the duplicate charge. Let me look into your account to investigate this billing issue.",
+      timestamp: new Date(evaluation.created_at.getTime() - 240000)
     },
     {
       id: "turn_3",
-      speaker: "customer", 
-      message: "Thank you. The charges are from last month, both for $29.99.",
-      timestamp: new Date(evaluation.created_at.getTime() - 180000),
-      metadata: { channel: "chat", session_id: evaluation.conversation_id }
+      conversation_id: evaluation.conversation_id,
+      speaker: "user", 
+      content: "Thank you. The charges are from last month, both for $29.99.",
+      timestamp: new Date(evaluation.created_at.getTime() - 180000)
     },
     {
       id: "turn_4",
-      speaker: "agent",
-      message: "I can see the duplicate charges in your account. I'll process a refund for the duplicate $29.99 charge right away. You should see it reflected in 3-5 business days.",
-      timestamp: new Date(evaluation.created_at.getTime() - 120000),
-      metadata: { agent_id: "agent_123", response_time_ms: 60000, actions: ["refund_processed"] }
+      conversation_id: evaluation.conversation_id,
+      speaker: "bot",
+      content: "I can see the duplicate charges in your account. I'll process a refund for the duplicate $29.99 charge right away. You should see it reflected in 3-5 business days.",
+      timestamp: new Date(evaluation.created_at.getTime() - 120000)
     }
   ];
 
@@ -257,14 +264,14 @@ function ConversationView({ evaluation }: { evaluation: QCEvaluation }) {
         <ScrollArea className="h-96">
           <div className="space-y-4">
             {mockTurns.map((turn) => (
-              <div key={turn.id} className={`flex ${turn.speaker === 'agent' ? 'justify-end' : 'justify-start'}`}>
+              <div key={turn.id} className={`flex ${turn.speaker === 'bot' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] rounded-lg p-3 ${
-                  turn.speaker === 'agent' 
+                  turn.speaker === 'bot' 
                     ? 'bg-blue-100 text-blue-900' 
                     : 'bg-gray-100 text-gray-900'
                 }`}>
                   <div className="flex items-center space-x-2 mb-1">
-                    {turn.speaker === 'agent' ? (
+                    {turn.speaker === 'bot' ? (
                       <Bot className="h-4 w-4" />
                     ) : (
                       <User className="h-4 w-4" />
@@ -274,12 +281,7 @@ function ConversationView({ evaluation }: { evaluation: QCEvaluation }) {
                       {turn.timestamp.toLocaleTimeString()}
                     </span>
                   </div>
-                  <p className="text-sm">{turn.message}</p>
-                  {turn.metadata?.response_time_ms && (
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Response time: {Math.round(turn.metadata.response_time_ms / 1000)}s
-                    </div>
-                  )}
+                  <p className="text-sm">{turn.content}</p>
                 </div>
               </div>
             ))}
@@ -398,10 +400,10 @@ function EvidenceView({ evaluation }: { evaluation: QCEvaluation }) {
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center space-x-2">
                 <FileText className="h-5 w-5" />
-                <span>{evidence.parameter_name}</span>
+                <span>{evidence.kb_document}</span>
               </span>
-              <Badge variant={evidence.found ? "default" : "destructive"}>
-                {evidence.found ? "Found" : "Missing"}
+              <Badge variant={evidence.evidence_type === 'supporting' ? "default" : "destructive"}>
+                {evidence.evidence_type === 'supporting' ? "Supporting" : evidence.evidence_type === 'contradicting' ? "Contradicting" : "Missing"}
               </Badge>
             </CardTitle>
           </CardHeader>
@@ -410,14 +412,14 @@ function EvidenceView({ evaluation }: { evaluation: QCEvaluation }) {
               <div>
                 <h4 className="font-medium text-sm mb-1">Evidence Text</h4>
                 <p className="text-sm bg-muted p-2 rounded">
-                  {evidence.evidence_text || "No evidence found"}
+                  {evidence.evidence_type || "No evidence found"}
                 </p>
               </div>
               
               <div>
                 <h4 className="font-medium text-sm mb-1">Location</h4>
                 <p className="text-sm text-muted-foreground">
-                  Turn {evidence.turn_index + 1} - {evidence.speaker}
+                  Turn {evidence.turn_index + 1}
                 </p>
               </div>
               
@@ -447,34 +449,34 @@ function ParametersView({ evaluation }: { evaluation: QCEvaluation }) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {evaluation.parameters.map((param, index) => (
-            <div key={index} className="border rounded-lg p-4">
+          {Object.entries(evaluation.parameters).filter(([key]) => key.startsWith('param_')).map(([key, value], index) => (
+            <div key={key} className="border rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">{param.name}</h4>
-                <Badge variant={param.status === "OK" ? "default" : "destructive"}>
-                  {param.status}
+                <h4 className="font-medium">{key.replace('param_', 'Parameter ')}</h4>
+                <Badge variant={value ? "default" : "destructive"}>
+                  {value ? "Pass" : "Fail"}
                 </Badge>
               </div>
               
               <p className="text-sm text-muted-foreground mb-3">
-                {param.description}
+                Evaluation parameter for quality control assessment.
               </p>
               
               <div className="grid gap-2 md:grid-cols-2">
                 <div>
                   <span className="text-xs text-muted-foreground">Weight</span>
-                  <div className="font-medium">{param.weight}</div>
+                  <div className="font-medium">1.0</div>
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground">Score</span>
-                  <div className="font-medium">{param.score}</div>
+                  <div className="font-medium">{value ? '100' : '0'}</div>
                 </div>
               </div>
               
-              {param.penalty && (
+              {!value && (
                 <div className="mt-2 p-2 bg-red-50 rounded text-sm">
-                  <span className="font-medium text-red-800">Penalty Applied: </span>
-                  <span className="text-red-600">{param.penalty.reason}</span>
+                  <span className="font-medium text-red-800">Failed: </span>
+                  <span className="text-red-600">Parameter evaluation failed</span>
                 </div>
               )}
             </div>
@@ -508,40 +510,38 @@ function KnowledgeBaseView({ evaluation }: { evaluation: QCEvaluation }) {
             </Badge>
           </div>
           
-          {kbVerification?.matched_articles && kbVerification.matched_articles.length > 0 && (
+          {kbVerification?.matched_chunks && kbVerification.matched_chunks.length > 0 && (
             <div>
-              <h4 className="font-medium mb-2">Matched Knowledge Articles</h4>
+              <h4 className="font-medium mb-2">Matched Knowledge Chunks</h4>
               <div className="space-y-2">
-                {kbVerification.matched_articles.map((article, index) => (
+                {kbVerification.matched_chunks.map((chunk: any, index: number) => (
                   <div key={index} className="border rounded p-3">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-sm">{article.title}</span>
+                      <span className="font-medium text-sm">Chunk {chunk.id || index + 1}</span>
                       <span className="text-xs text-muted-foreground">
-                        {Math.round(article.relevance_score * 100)}% match
+                        Score: {chunk.score || 'N/A'}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{article.summary}</p>
+                    <p className="text-sm text-muted-foreground">{chunk.content || 'No content available'}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
           
-          {kbVerification?.discrepancies && kbVerification.discrepancies.length > 0 && (
+          {kbVerification?.verification_status === 'CONTRADICTED' && (
             <div>
               <h4 className="font-medium mb-2 text-red-600">Policy Discrepancies</h4>
               <div className="space-y-2">
-                {kbVerification.discrepancies.map((discrepancy, index) => (
-                  <div key={index} className="border border-red-200 rounded p-3 bg-red-50">
-                    <div className="font-medium text-sm text-red-800 mb-1">
-                      {discrepancy.type}
-                    </div>
-                    <p className="text-sm text-red-600">{discrepancy.description}</p>
-                    <p className="text-xs text-red-500 mt-1">
-                      Severity: {discrepancy.severity}
-                    </p>
+                <div className="border border-red-200 rounded p-3 bg-red-50">
+                  <div className="font-medium text-sm text-red-800 mb-1">
+                    Contradiction Found
                   </div>
-                ))}
+                  <p className="text-sm text-red-600">Knowledge base verification found contradictory information.</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    Severity: High
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -549,14 +549,14 @@ function KnowledgeBaseView({ evaluation }: { evaluation: QCEvaluation }) {
           <div className="pt-4 border-t">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <span className="text-sm text-muted-foreground">Last Updated</span>
+                <span className="text-sm text-muted-foreground">Top K Results</span>
                 <div className="font-medium">
-                  {kbVerification?.last_updated?.toLocaleDateString() || "N/A"}
+                  {kbVerification?.top_k_results || "N/A"}
                 </div>
               </div>
               <div>
-                <span className="text-sm text-muted-foreground">KB Version</span>
-                <div className="font-medium">{kbVerification?.kb_version || "1.0"}</div>
+                <span className="text-sm text-muted-foreground">Verified</span>
+                <div className="font-medium">{kbVerification?.verified ? "Yes" : "No"}</div>
               </div>
             </div>
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const links = [
   { href: "/", label: "Dashboard" },
@@ -16,18 +17,25 @@ const links = [
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <nav className="px-2 py-2 text-sm">
       {links.map((l) => {
-        const active = pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href));
+        // Only apply active state after client hydration to prevent mismatch
+        const active = isClient && (pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href)));
         return (
           <a
             key={l.href}
             className={
               `block px-3 py-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 ` +
               (active
-                ? "bg-neutral-900 text-neutral-100 dark:bg-neutral-100 dark:text-neutral-900"
-                : "hover:bg-neutral-100 dark:hover:bg-neutral-800")
+                ? "bg-neutral-900 text-neutral-100"
+                : "hover:bg-neutral-200")
             }
             href={l.href}
           >

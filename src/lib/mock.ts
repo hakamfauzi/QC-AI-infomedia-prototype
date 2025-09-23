@@ -1,6 +1,7 @@
 import { QCEvaluation, OverviewStats, QueueStats, ScoreDistribution, StatusBreakdown, SystemHealth } from '@/types';
 
-const now = new Date();
+// Use static timestamp to prevent hydration mismatches
+const now = new Date('2024-01-15T14:30:00Z');
 
 export const EVALUATIONS: QCEvaluation[] = [
   {
@@ -57,6 +58,7 @@ export const EVALUATIONS: QCEvaluation[] = [
       score: 62,
       matched_chunks: [],
       verification_status: "EVIDENCE_MISSING",
+      verified: false,
       top_k_results: 5,
       filter_criteria: { doc_type: "billing", version: "v2.3" }
     },
@@ -72,7 +74,8 @@ export const EVALUATIONS: QCEvaluation[] = [
     created_at: new Date(now.getTime() - 6.5 * 3600_000),
     completed_at: new Date(now.getTime() - 6.4 * 3600_000),
     sla_due: new Date(now.getTime() + 18 * 3600_000),
-    priority: "high"
+    priority: "high",
+    coverage_percentage: 85
   },
   {
     id: "98232",
@@ -103,6 +106,7 @@ export const EVALUATIONS: QCEvaluation[] = [
       score: 91,
       matched_chunks: [],
       verification_status: "SUPPORTED",
+      verified: true,
       top_k_results: 5,
       filter_criteria: { doc_type: "support", version: "v2.3" }
     },
@@ -117,7 +121,8 @@ export const EVALUATIONS: QCEvaluation[] = [
     ],
     created_at: new Date(now.getTime() - 3.2 * 3600_000),
     completed_at: new Date(now.getTime() - 3.1 * 3600_000),
-    priority: "medium"
+    priority: "medium",
+    coverage_percentage: 92
   },
   {
     id: "98233",
@@ -162,6 +167,7 @@ export const EVALUATIONS: QCEvaluation[] = [
       score: 40,
       matched_chunks: [],
       verification_status: "CONTRADICTED",
+      verified: false,
       top_k_results: 5,
       filter_criteria: { doc_type: "onboarding", version: "v2.2" }
     },
@@ -177,7 +183,8 @@ export const EVALUATIONS: QCEvaluation[] = [
     created_at: new Date(now.getTime() - 10.1 * 3600_000),
     completed_at: new Date(now.getTime() - 10.0 * 3600_000),
     sla_due: new Date(now.getTime() + 6 * 3600_000),
-    priority: "critical"
+    priority: "critical",
+    coverage_percentage: 45
   },
   {
     id: "98234",
@@ -208,6 +215,7 @@ export const EVALUATIONS: QCEvaluation[] = [
       score: 0,
       matched_chunks: [],
       verification_status: "SUPPORTED",
+      verified: true,
       top_k_results: 5,
       filter_criteria: { doc_type: "billing", version: "v2.3" }
     },
@@ -222,7 +230,8 @@ export const EVALUATIONS: QCEvaluation[] = [
     ],
     created_at: new Date(now.getTime() - 1.1 * 3600_000),
     started_at: new Date(now.getTime() - 0.1 * 3600_000),
-    priority: "medium"
+    priority: "medium",
+    coverage_percentage: 0
   }
 ];
 
@@ -323,9 +332,9 @@ export function computeOverviewStats(rows: QCEvaluation[]): OverviewStats {
   };
 }
 
-export function toCSV(rows: Evaluation[]): string {
-  const header = ["id","bot","team","end","score","status","overrides","penalties","kbVerify","slaDue","model"];
-  const body = rows.map((r) => [r.id, r.bot, r.team, r.end, r.score, r.status, r.overrides.join("|"), r.penalties.join("|"), r.kbVerify, r.slaDue, r.model]);
+export function toCSV(rows: QCEvaluation[]): string {
+  const header = ["id","conversation_id","score","status","final_status","priority","coverage_percentage","sla_due"];
+  const body = rows.map((r) => [r.id, r.conversation_id, r.score, r.status, r.final_status, r.priority, r.coverage_percentage, r.sla_due?.toISOString() || '']);
   return [header, ...body].map((row) => row.map((v) => `"${String(v).replaceAll('"','\"')}"`).join(",")).join("\n");
 }
 

@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ToastProvider";
 import { SidebarNav } from "@/components/SidebarNav";
-import { DarkModeToggle } from "@/components/DarkModeToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,15 +29,14 @@ export default function RootLayout({
       <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ToastProvider>
         <div className="min-h-dvh grid grid-cols-[260px_1fr]">
-          <aside className="border-r border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+          <aside className="border-r border-neutral-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
             <div className="h-14 flex items-center px-4 font-semibold tracking-wide">Agentic QC AI</div>
             <SidebarNav />
           </aside>
-          <main className="min-h-dvh bg-neutral-50 dark:bg-neutral-900">
-            <header className="h-14 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between px-4 sticky top-0 bg-neutral-50/80 dark:bg-neutral-900/80 backdrop-blur z-10">
+          <main className="min-h-dvh bg-neutral-50">
+            <header className="h-14 border-b border-neutral-200 flex items-center justify-between px-4 sticky top-0 bg-neutral-50/80 backdrop-blur z-10">
               <div className="text-sm text-neutral-500">Filters • Time · Bot · Team</div>
               <div className="flex items-center gap-3">
-                <DarkModeToggle />
                 <div className="text-xs text-neutral-400">Prototype v1</div>
               </div>
             </header>

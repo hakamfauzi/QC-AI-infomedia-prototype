@@ -1,5 +1,7 @@
 // Core data types for the Agentic QC AI Platform
 
+export type Priority = 'low' | 'medium' | 'high' | 'critical';
+
 export interface Conversation {
   id: string;
   bot: string;
@@ -44,7 +46,8 @@ export interface QCEvaluation {
   started_at?: Date;
   completed_at?: Date;
   sla_due?: Date;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: Priority;
+  coverage_percentage: number;
 }
 
 export interface EvaluationParameters {
@@ -66,7 +69,7 @@ export interface EvaluationParameters {
 }
 
 export interface TurnParameters {
-  [key: string]: boolean;
+  [key: string]: boolean | { [key: string]: number };
   confidence_scores: { [key: string]: number };
 }
 
@@ -85,6 +88,7 @@ export interface KBVerification {
   score: number; // 0-100
   matched_chunks: KBChunk[];
   verification_status: 'SUPPORTED' | 'EVIDENCE_MISSING' | 'CONTRADICTED';
+  verified: boolean;
   top_k_results: number;
   filter_criteria: {
     doc_type?: string;
@@ -293,6 +297,9 @@ export interface RealtimeUpdate {
   data: any;
   timestamp: Date;
 }
+
+// Alias for backward compatibility
+export type Evaluation = QCEvaluation;
 
 export interface SystemHealth {
   llm_service: {

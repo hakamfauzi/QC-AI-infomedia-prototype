@@ -144,6 +144,14 @@ export default function QCQueue({ onEvaluationSelect }: QCQueueProps) {
     }
   };
 
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    setCurrentTime(new Date());
+    const interval = setInterval(() => setCurrentTime(new Date()), 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
+
   const getProcessingTime = (evaluation: QCEvaluation) => {
     if (evaluation.completed_at) {
       const diff = evaluation.completed_at.getTime() - evaluation.created_at.getTime();
@@ -151,7 +159,7 @@ export default function QCQueue({ onEvaluationSelect }: QCQueueProps) {
       return `${hours}h`;
     }
     if (evaluation.status === "processing") {
-      const diff = Date.now() - evaluation.created_at.getTime();
+      const diff = currentTime.getTime() - evaluation.created_at.getTime();
       const hours = Math.round(diff / (1000 * 60 * 60) * 10) / 10;
       return `${hours}h (ongoing)`;
     }
@@ -352,6 +360,14 @@ interface EvaluationTableProps {
 }
 
 function EvaluationTable({ evaluations, loading, onEvaluationSelect }: EvaluationTableProps) {
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    setCurrentTime(new Date());
+    const interval = setInterval(() => setCurrentTime(new Date()), 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
@@ -400,7 +416,7 @@ function EvaluationTable({ evaluations, loading, onEvaluationSelect }: Evaluatio
       return `${hours}h`;
     }
     if (evaluation.status === "processing") {
-      const diff = Date.now() - evaluation.created_at.getTime();
+      const diff = currentTime.getTime() - evaluation.created_at.getTime();
       const hours = Math.round(diff / (1000 * 60 * 60) * 10) / 10;
       return `${hours}h (ongoing)`;
     }

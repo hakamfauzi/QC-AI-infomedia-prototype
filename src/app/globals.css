@@ -2,33 +2,46 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1f2937;
+  --muted: #f9fafb;
+  --muted-foreground: #6b7280;
+  --border: #e5e7eb;
+  --input: #ffffff;
+  --primary: #dc2626;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #374151;
+  --accent: #fef2f2;
+  --accent-foreground: #991b1b;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-brand-50: #fff1f2;
-  --color-brand-100: #ffe4e6;
-  --color-brand-200: #fecdd3;
-  --color-brand-500: #ef4444; /* red-500 */
-  --color-brand-600: #dc2626; /* red-600 */
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-brand-50: #fef2f2;
+  --color-brand-100: #fee2e2;
+  --color-brand-200: #fecaca;
+  --color-brand-500: #dc2626;
+  --color-brand-600: #b91c1c;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-/* Support class-based dark mode as well */
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-}
+/* Single light theme - white and red color scheme */
 
 body {
   background: var(--background);
@@ -54,16 +67,9 @@ body {
   transform: translateY(-1px);
 }
 
-/* Design tokens for surfaces/borders (light/dark switch uses CSS vars, not media) */
+/* Design tokens for surfaces/borders */
 :root {
   --surface: #ffffff;
   --surface-muted: #f7f7f7;
-  --border: #e5e5e5;
   --text-muted: #6b7280; /* neutral-500 */
-}
-.dark {
-  --surface: #0b0b0b;
-  --surface-muted: #111111;
-  --border: #262626;
-  --text-muted: #9ca3af; /* neutral-400 */
 }

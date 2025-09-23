@@ -9,17 +9,24 @@ const DEFAULT_CONFIG: Config = { ok: 80, reviewMin: 65, penaltyBlaming: 30, pena
 export default function AdminPage() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG);
   const [saved, setSaved] = useState<string>("");
+  const [currentTime, setCurrentTime] = useState<string>("");
 
   useEffect(() => {
     const raw = window.localStorage.getItem("qc-config");
     if (raw) setConfig(JSON.parse(raw));
+    
+    setCurrentTime(new Date().toLocaleTimeString());
+    const interval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   function save() {
     const newCfg = { ...config, version: (parseFloat(config.version) + 0.1).toFixed(1) } as Config;
     window.localStorage.setItem("qc-config", JSON.stringify(newCfg));
     setConfig(newCfg);
-    setSaved(`Saved v${newCfg.version} @ ${new Date().toLocaleTimeString()}`);
+    setSaved(`Saved v${newCfg.version} @ ${currentTime}`);
   }
 
   return (
