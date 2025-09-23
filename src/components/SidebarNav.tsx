@@ -3,12 +3,12 @@
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/", label: "Overview" },
-  { href: "/qc-queue", label: "QC Queue" },
-  { href: "/conversation/123", label: "Conversation Detail" },
+  { href: "/", label: "Dashboard" },
+  { href: "/qc", label: "QC Queue" },
+  { href: "/analytics", label: "Analytics" },
   { href: "/calibration", label: "Calibration" },
   { href: "/sampling", label: "Sampling" },
-  { href: "/knowledge", label: "Knowledge" },
+  { href: "/knowledge", label: "Knowledge Base" },
   { href: "/incidents", label: "Incidents" },
   { href: "/reports", label: "Reports" },
   { href: "/admin", label: "Admin" },
