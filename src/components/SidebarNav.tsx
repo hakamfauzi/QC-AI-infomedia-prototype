@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 const links = [
   { href: "/", label: "Dashboard" },
+  { href: "/submit", label: "Submit QC" },
   { href: "/qc", label: "QC Queue" },
   { href: "/analytics", label: "Analytics" },
   { href: "/calibration", label: "Calibration" },
@@ -17,17 +18,33 @@ const links = [
 
 export function SidebarNav() {
   const pathname = usePathname();
-  const [isClient, setIsClient] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
+    setMounted(true);
   }, []);
+
+  // Prevent hydration mismatch by not rendering active states until mounted
+  if (!mounted) {
+    return (
+      <nav className="px-2 py-2 text-sm">
+        {links.map((l) => (
+          <a
+            key={l.href}
+            className="block px-3 py-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 hover:bg-neutral-200"
+            href={l.href}
+          >
+            {l.label}
+          </a>
+        ))}
+      </nav>
+    );
+  }
 
   return (
     <nav className="px-2 py-2 text-sm">
       {links.map((l) => {
-        // Only apply active state after client hydration to prevent mismatch
-        const active = isClient && (pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href)));
+        const active = pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href));
         return (
           <a
             key={l.href}
