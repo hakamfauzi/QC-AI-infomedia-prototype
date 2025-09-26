@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 type Config = { ok: number; reviewMin: number; penaltyBlaming: number; penaltySensitive: number; version: string };
 
@@ -30,21 +31,23 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="max-w-xl space-y-3">
-      <div className="text-lg font-semibold">Admin • Scoring & Thresholds</div>
-      <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
-        <Field label="OK threshold (≥)" value={config.ok} onChange={(v) => setConfig((c) => ({ ...c, ok: v }))} />
-        <Field label="Review min" value={config.reviewMin} onChange={(v) => setConfig((c) => ({ ...c, reviewMin: v }))} />
-        <Field label="Penalty: Blaming" value={config.penaltyBlaming} onChange={(v) => setConfig((c) => ({ ...c, penaltyBlaming: v }))} />
-        <Field label="Penalty: Sensitive validation fail" value={config.penaltySensitive} onChange={(v) => setConfig((c) => ({ ...c, penaltySensitive: v }))} />
-        <div className="text-xs text-neutral-500">Current version: v{config.version}</div>
-        <div className="flex gap-2">
-          <button onClick={save} className="h-9 px-3 rounded-md border border-neutral-300 dark:border-neutral-700">Save (bump version)</button>
-          {saved ? <div className="text-xs text-emerald-600">{saved}</div> : null}
+    <ProtectedRoute>
+      <div className="max-w-xl space-y-3">
+        <div className="text-lg font-semibold">Admin • Scoring & Thresholds</div>
+        <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
+          <Field label="OK threshold (≥)" value={config.ok} onChange={(v) => setConfig((c) => ({ ...c, ok: v }))} />
+          <Field label="Review min" value={config.reviewMin} onChange={(v) => setConfig((c) => ({ ...c, reviewMin: v }))} />
+          <Field label="Penalty: Blaming" value={config.penaltyBlaming} onChange={(v) => setConfig((c) => ({ ...c, penaltyBlaming: v }))} />
+          <Field label="Penalty: Sensitive validation fail" value={config.penaltySensitive} onChange={(v) => setConfig((c) => ({ ...c, penaltySensitive: v }))} />
+          <div className="text-xs text-neutral-500">Current version: v{config.version}</div>
+          <div className="flex gap-2">
+            <button onClick={save} className="h-9 px-3 rounded-md border border-neutral-300 dark:border-neutral-700">Save (bump version)</button>
+            {saved ? <div className="text-xs text-emerald-600">{saved}</div> : null}
+          </div>
         </div>
+        <div className="text-sm text-neutral-500">Evaluations will display the config version used (prototype uses latest from localStorage).</div>
       </div>
-      <div className="text-sm text-neutral-500">Evaluations will display the config version used (prototype uses latest from localStorage).</div>
-    </div>
+    </ProtectedRoute>
   );
 }
 

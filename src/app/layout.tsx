@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ToastProvider";
-import { SidebarNav } from "@/components/SidebarNav";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ConditionalLayout from "@/components/ConditionalLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,25 +28,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ToastProvider>
-        <div className="min-h-dvh grid grid-cols-[260px_1fr]">
-          <aside className="border-r border-neutral-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-            <div className="h-14 flex items-center px-4 font-semibold tracking-wide">Agentic QC AI</div>
-            <SidebarNav />
-          </aside>
-          <main className="min-h-dvh bg-neutral-50">
-            <header className="h-14 border-b border-neutral-200 flex items-center justify-between px-4 sticky top-0 bg-neutral-50/80 backdrop-blur z-10">
-              <div className="text-sm text-neutral-500">Filters • Time · Bot · Team</div>
-              <div className="flex items-center gap-3">
-                <div className="text-xs text-neutral-400">Prototype v1</div>
-              </div>
-            </header>
-            <div className="p-4 max-w-[1400px] mx-auto">
+        <AuthProvider>
+          <ToastProvider>
+            <ConditionalLayout>
               {children}
-            </div>
-          </main>
-        </div>
-        </ToastProvider>
+            </ConditionalLayout>
+          </ToastProvider>
+        </AuthProvider>
       </body>
     </html>
   );
